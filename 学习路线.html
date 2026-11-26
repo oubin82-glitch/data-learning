@@ -1,0 +1,189 @@
+<title>宴席数据学习路线</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: 单列周计划，阶段分组，左侧周号 + 日期，右侧三段内容，顶部总进度 */
+:root{
+  --bg:#f5f6f4; --surface:#ffffff; --ink:#1d2321; --muted:#5f6b67; --line:#dde2df;
+  --accent:#8c1d2c; --accent-soft:#f3e3e5; --done:#2f7a55; --done-soft:#e2f1e8;
+  --now:#b8860b; --now-soft:#fbf1d9;
+  --f-display:"Space Grotesk","Noto Sans SC",system-ui,sans-serif;
+  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark;--bg:#141816;--surface:#1c2220;--ink:#e6ebe8;--muted:#9aa7a2;--line:#2e3633;
+  --accent:#e0707e;--accent-soft:#3a2226;--done:#6cc596;--done-soft:#1d3328;--now:#e6b64a;--now-soft:#3a3018;}}
+:root[data-theme="dark"]{
+  color-scheme:dark;--bg:#141816;--surface:#1c2220;--ink:#e6ebe8;--muted:#9aa7a2;--line:#2e3633;
+  --accent:#e0707e;--accent-soft:#3a2226;--done:#6cc596;--done-soft:#1d3328;--now:#e6b64a;--now-soft:#3a3018;}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2{font-family:var(--f-display);text-wrap:balance;margin:0}
+h1{font-size:30px;line-height:1.25}
+h2{font-size:20px}
+.lead{color:var(--muted);margin:8px 0 0;max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:500}
+code,.mono{font-family:var(--f-mono);font-size:12.5px}
+.progress{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--done);width:0;transition:width .3s}
+.prow{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.phases a{font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:6px 8px;display:flex;flex-direction:column;gap:2px}
+.phases a b{color:var(--ink);font-weight:500}
+.phases a:hover,.phases a:focus-visible{border-color:var(--accent);outline:none}
+@media (max-width:560px){.phases{grid-template-columns:repeat(2,1fr)}}
+.phase{display:flex;flex-direction:column;gap:10px}
+.phase-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--accent);padding-bottom:6px}
+.phase-head span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.phase-goal{font-size:14px;color:var(--muted);margin:0}
+.week{display:grid;grid-template-columns:92px 1fr;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.week.is-done{background:var(--done-soft);border-color:transparent}
+.week.is-now{border-color:var(--now);box-shadow:inset 3px 0 0 var(--now)}
+.wk{display:flex;flex-direction:column;gap:4px}
+.wk .n{font-family:var(--f-display);font-weight:700;font-size:18px}
+.wk .d{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.wk .tag{font-size:11px;padding:1px 6px;border-radius:4px;align-self:flex-start;letter-spacing:.04em}
+.tag.now{background:var(--now-soft);color:var(--now)}
+.tag.ok{background:var(--done);color:var(--surface)}
+.body{display:flex;flex-direction:column;gap:6px;min-width:0}
+.body h3{margin:0;font-size:16px;font-weight:700}
+.row{display:grid;grid-template-columns:72px 1fr;gap:8px;font-size:14px}
+.row dt{color:var(--muted);font-size:12px;letter-spacing:.06em;padding-top:2px}
+.row dd{margin:0}
+.row.task dd{color:var(--ink)}
+.row.task dt{color:var(--accent)}
+label.chk{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer;margin-top:4px;align-self:flex-start}
+label.chk input{width:16px;height:16px;accent-color:var(--done)}
+input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:560px){.week{grid-template-columns:1fr}.wk{flex-direction:row;align-items:baseline;gap:10px}.row{grid-template-columns:1fr;gap:0}}
+.notes{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.notes ul{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>宴席数据学习路线</h1>
+    <p class="lead">34 周，从 Python 读表一路学到做出能上简历的 AI 数据应用。每周的练习都用同一份《模拟宴席明细》：500 场宴席，14 个字段，品牌、片区、荐酒员、桌数、出货和开瓶都有。</p>
+  </header>
+
+  <div class="meta">
+    <span>起始 <b>2026-11-16（周一）</b></span>
+    <span>结束 <b>2027-07-11</b></span>
+    <span>每周约 <b>7 小时</b>：工作日 4 晚 × 1 小时 + 周末 3 小时</span>
+    <span>数据 <b class="mono">学习\模拟宴席明细.xlsx</b></span>
+  </div>
+
+  <section class="progress" aria-label="总进度">
+    <div class="prow"><span id="pnow">本周</span><span id="pcount">0 / 34 周完成</span></div>
+    <div class="bar"><i id="pbar"></i></div>
+    <nav class="phases" id="phasenav"></nav>
+  </section>
+
+  <main id="plan" class="wrap" style="gap:36px"></main>
+
+  <section class="notes">
+    <h2>怎么用 AI 当老师</h2>
+    <ul>
+      <li>每周先自己写，卡住超过 20 分钟再问 AI。问的时候贴上报错和你的代码，让它指出错在哪，别让它直接重写。</li>
+      <li>AI 给的代码，逐行让它解释，再自己改一个条件跑一遍，结果对得上才算懂。</li>
+      <li>每周日把本周代码存进 GitHub，一个文件夹一周，提交说明写这周学了什么。</li>
+      <li>某周没做完不用补到下周，标记跳过的点，阶段末的周会留出空间回头补。</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+const START = new Date(2026,10,16);
+const phases = [
+ {id:"p1",name:"Python + pandas 入门",goal:"能用 Python 读宴席明细、筛选、分组汇总，复刻你工作里的汇总表。",weeks:[
+  ["环境搭好，读进第一张表","安装 Python 和 VS Code；变量、列表、字典；pandas 读 Excel","读入模拟宴席明细，打印 shape、head、dtypes，说出 14 个字段各是什么意思","第1周练习.py"],
+  ["筛选数据","if 判断、布尔索引、loc、isin","筛出上海片区、已结束、国窖品牌的宴席；数一下各状态有多少场","能写出任意组合的筛选条件"],
+  ["分组汇总","groupby、agg、sort_values","按片区、品牌汇总场次、桌数、出货瓶数、开瓶瓶数，按场次降序","片区×品牌汇总表"],
+  ["新增指标并导出","新列计算、日期转换、to_excel","算开瓶率＝开瓶/出货、瓶/桌；从开始时间取出月份；用 Python 重做上海片区荐酒员汇总表并导出","阶段作品：Python 版汇总表"]]},
+ {id:"p2",name:"数据清洗与可视化",goal:"会处理脏数据，会出图，能把一份周报做成一键生成的脚本。",weeks:[
+  ["数据清洗","缺失值、重复值、字符串处理、异常值","找出异常结束、开瓶为 0、出货远大于桌数的记录；从活动名称里拆出日期和客户姓","清洗规则清单"],
+  ["透视与合并","pivot_table、merge","做荐酒员×品牌透视表；自己造一张终端维表（编码、等级、区县）和明细合并","透视表 + 合并后的宽表"],
+  ["画图","matplotlib 基础，柱状图、折线图、中文字体","画月度场次趋势、片区开瓶率对比、宴席类型占比","3 张图"],
+  ["写成自动化脚本","函数、for 循环、文件路径、openpyxl 格式","写一个脚本：放入新明细 → 自动出带格式的汇总 Excel 和图","阶段作品：一键周报脚本"]]},
+ {id:"p3",name:"SQL",goal:"能独立写出分组、多表关联和窗口函数，过面试 SQL 题。",weeks:[
+  ["SQL 入门","DuckDB 安装；SELECT、WHERE、ORDER BY、LIMIT","把明细导入 DuckDB，用 SQL 重做第 2 周的筛选","10 条查询"],
+  ["分组与条件","GROUP BY、HAVING、CASE WHEN、COUNT DISTINCT","按片区算场次和开瓶率；用 CASE 把桌数分成小/中/大宴席","10 条查询"],
+  ["多表关联","表设计、JOIN、子查询、CTE","把明细拆成宴席表、终端表、荐酒员表，再 JOIN 回来做汇总","3 张表的建表语句 + 查询"],
+  ["窗口函数","RANK、ROW_NUMBER、LAG、SUM OVER","每个片区荐酒员排名前 3；按月的场次环比；累计开瓶数","阶段作品：宴席 SQL 题集 20 题"]]},
+ {id:"p4",name:"分析思维与统计",goal:"从会算数到会讲结论：知道看什么指标、为什么、下一步做什么。",weeks:[
+  ["搭指标体系","北极星指标、过程指标、维度拆解","给宴席业务定指标：场次、桌数、瓶/桌、开瓶率、异常率，画一张指标树","指标树"],
+  ["描述统计","均值、中位数、分位数、标准差、箱线图","看各品牌瓶/桌的分布，找出明显偏离的终端和荐酒员","异常名单"],
+  ["对比与归因","同比环比、结构拆解、相关性","开瓶率差异主要来自品牌、宴席类型还是片区？用数据回答","一页分析结论"],
+  ["分层分析","RFM 思路、分箱、四象限","按场次和开瓶率把荐酒员分成四类，给每类写跟进建议","荐酒员分层表"]]},
+ {id:"p5",name:"BI 报表与项目一",goal:"做出第一个完整作品：宴席运营分析，从数据到看板到报告。",weeks:[
+  ["Power BI 入门","Power BI Desktop、导入、数据模型、关系","把 3 张表导入并建好关系","数据模型截图"],
+  ["做看板","DAX 基础度量值、切片器、地图和趋势图","做宴席运营看板：总览卡片、片区地图、品牌趋势、荐酒员排名","看板 1 页"],
+  ["写分析报告","结论先行、图表配文字、给建议","写一份 1 页的宴席运营月报：发现了什么、为什么、建议做什么","月报 PDF"],
+  ["项目一收尾","GitHub README、项目说明写法","整理代码、SQL、看板截图和报告，写成项目一放上 GitHub","项目一：宴席运营分析"]]},
+ {id:"p6",name:"AI 应用入门",goal:"会调用大模型 API，用它处理业务数据，做出能点开用的小工具。",weeks:[
+  ["调用大模型 API","DeepSeek 或通义千问 API、requests、提示词、让模型返回 JSON","用 Python 调 API，让模型读一条宴席记录写一句点评","能跑通的 API 脚本"],
+  ["批量文本处理","批量调用、结构化输出、结果校验","让模型从活动名称里抽取宴席类型和客户姓，和表里的宴席类型字段对比准确率","准确率对比表"],
+  ["Streamlit 小应用","Streamlit 页面、上传文件、展示表和图","做一个网页：上传宴席明细 → 自动显示汇总表和图","可运行的小应用"],
+  ["自然语言查数据","Text-to-SQL：把表结构写进提示词，模型写 SQL，DuckDB 执行","在应用里加输入框：输入“上海片区 9 月开瓶率最高的荐酒员”，返回答案","问数功能"]]},
+ {id:"p7",name:"AI 进阶与项目二",goal:"做出第二个作品：宴席数据智能助手，能演示给面试官看。",weeks:[
+  ["RAG 基础","embedding、向量检索、切块","用公开的白酒品牌和产品资料做一个问答：问产品信息能答对","问答 demo"],
+  ["工具调用","function calling、让模型决定调哪个函数","让助手能选择：查数据、出图、生成周报三种工具","工具调用 demo"],
+  ["项目二开发","把前几周拼起来，加错误处理","宴席数据智能助手：上传数据 → 问问题 → 出图 → 一键生成周报","可用版本"],
+  ["项目二上线","部署到 Streamlit Cloud 或国内云、录演示视频","部署上线，录一段 2 分钟演示，写 README","项目二：宴席数据智能助手"]]},
+ {id:"p8",name:"求职冲刺",goal:"把 8 个月的产出变成简历和面试表现，投成都、重庆的岗位。",weeks:[
+  ["简历","STAR 写法、量化成果","简历写清楚：快消渠道业务 + 2 个项目 + 工作里的真实汇总经验","简历 v1"],
+  ["SQL 面试题","常见题型：排名、留存、连续登录、同比","刷 30 道 SQL 题，再用宴席数据各出 5 道自己的题","错题本"],
+  ["业务案例题","指标异常怎么查、怎么做方案","练 5 道业务 case：比如“上海片区开瓶率下降了怎么分析”","5 份答题提纲"],
+  ["模拟面试","自我介绍、项目讲解、追问应对","让 AI 扮演面试官，讲两个项目各 3 遍，录音复听","项目讲稿"],
+  ["投递","Boss 直聘、猎聘，岗位关键词筛选","每天投 5–10 个成都、重庆的数据分析岗，记录投递表","投递记录"],
+  ["复盘与补漏","整理面试问到的问题，回头补薄弱点","根据面试反馈补知识点，更新简历 v2","简历 v2"]]}
+];
+const KEY="yanxi-plan-done";
+let done={};try{done=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}};
+const fmt=d=>`${d.getMonth()+1}/${d.getDate()}`;
+const today=new Date();const nowIdx=Math.floor((today-START)/(7*864e5));
+const plan=document.getElementById("plan"),nav=document.getElementById("phasenav");
+let n=0;
+phases.forEach((p,pi)=>{
+  const sec=document.createElement("section");sec.className="phase";sec.id=p.id;
+  const first=n+1,last=n+p.weeks.length;
+  const s=new Date(START.getTime()+(first-1)*7*864e5),e=new Date(START.getTime()+(last*7-1)*864e5);
+  sec.innerHTML=`<div class="phase-head"><h2>阶段 ${pi+1} · ${p.name}</h2><span>第 ${first}–${last} 周 · ${fmt(s)}–${fmt(e)}</span></div><p class="phase-goal">${p.goal}</p>`;
+  nav.insertAdjacentHTML("beforeend",`<a href="#${p.id}"><b>${pi+1}. ${p.name}</b><span data-ph="${pi}">0/${p.weeks.length}</span></a>`);
+  p.weeks.forEach(w=>{
+    n++;const i=n;const ws=new Date(START.getTime()+(i-1)*7*864e5),we=new Date(ws.getTime()+6*864e5);
+    const el=document.createElement("article");el.className="week";el.dataset.w=i;el.dataset.ph=pi;
+    el.innerHTML=`<div class="wk"><span class="n">W${i}</span><span class="d">${fmt(ws)}–${fmt(we)}</span><span class="tag"></span></div>
+    <div class="body"><h3>${w[0]}</h3><dl style="margin:0;display:flex;flex-direction:column;gap:4px">
+    <div class="row"><dt>学</dt><dd>${w[1]}</dd></div>
+    <div class="row task"><dt>宴席练习</dt><dd>${w[2]}</dd></div>
+    <div class="row"><dt>产出</dt><dd>${w[3]}</dd></div></dl>
+    <label class="chk"><input type="checkbox" id="w${i}"> 本周完成</label></div>`;
+    const cb=el.querySelector("input");cb.checked=!!done[i];
+    cb.addEventListener("change",()=>{cb.checked?done[i]=1:delete done[i];save();refresh()});
+    sec.appendChild(el);
+  });
+  plan.appendChild(sec);
+});
+function refresh(){
+  const total=n,cnt=Object.keys(done).length;
+  document.getElementById("pcount").textContent=`${cnt} / ${total} 周完成`;
+  document.getElementById("pbar").style.width=(cnt/total*100)+"%";
+  document.getElementById("pnow").textContent=nowIdx<0?"还没开始":nowIdx>=total?"计划期已结束":`今天是第 ${nowIdx+1} 周`;
+  const per=phases.map(()=>0);
+  document.querySelectorAll(".week").forEach(el=>{
+    const i=+el.dataset.w,isDone=!!done[i],isNow=i===nowIdx+1;
+    el.classList.toggle("is-done",isDone);el.classList.toggle("is-now",isNow&&!isDone);
+    const t=el.querySelector(".tag");t.className="tag "+(isDone?"ok":isNow?"now":"");t.textContent=isDone?"已完成":isNow?"本周":"";
+    if(isDone)per[+el.dataset.ph]++;
+  });
+  document.querySelectorAll("[data-ph]").forEach(s=>{if(s.tagName==="SPAN"){const k=+s.dataset.ph;s.textContent=`${per[k]}/${phases[k].weeks.length} 周`}});
+}
+refresh();
+</script>
